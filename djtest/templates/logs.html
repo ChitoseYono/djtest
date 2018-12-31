@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MyLogs</title>
+</head>
+<body>
+<div id="btns">
+{#    <input type="button" value="管理任务">#}
+    <a href="/djtest/new/">新增任务</a>
+</div>
+<div id="logs_div">
+    <table id="logs">
+        {% for log in logs %}
+            <tr id="">
+                <td>{{ log.name }}</td>
+                {% if log.status %}
+                <td> 进行中...</td>
+                    {% else %}
+                    <td>已结束</td>
+                {% endif %}
+                <td><a href="{% url 'djtest:log_page' log.id %}">查看</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+</body>
+</html>

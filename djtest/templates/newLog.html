@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form action="{% url 'djtest:log_add' %}" method="post">
+    <label>事件标题
+        <input name="name">
+    </label>
+    <label>最终目标
+        <input name="mission">
+    </label>
+    <input type="submit" value="新建">
+</form>
+</body>
+</html>

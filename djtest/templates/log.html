@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ log.name }}</title>
+    <script>
+
+        {#var seq = {{ flags.length }};#}
+
+        function MillisecondToDate(msd) {
+            var time = parseFloat(msd) / 1000;   //先将毫秒转化成秒
+            if (null != time && "" != time) {
+                if (time > 60 && time < 60 * 60) {
+                    time = parseInt(time / 60.0) + "分钟" + parseInt((parseFloat(time / 60.0) -
+                        parseInt(time / 60.0)) * 60) + "秒";
+                }
+                else if (time >= 60 * 60 && time < 60 * 60 * 24) {
+                    time = parseInt(time / 3600.0) + "小时" + parseInt((parseFloat(time / 3600.0) -
+                        parseInt(time / 3600.0)) * 60) + "分钟" +
+                        parseInt((parseFloat((parseFloat(time / 3600.0) - parseInt(time / 3600.0)) * 60) -
+                            parseInt((parseFloat(time / 3600.0) - parseInt(time / 3600.0)) * 60)) * 60) + "秒";
+                }
+                else {
+                    time = parseInt(time) + "秒";
+                }
+            }
+            return time;
+        }
+
+        {#function addRow() {#}
+        {#    var flag_div = document.getElementById("flag_div");#}
+        {#    var flags = flag_div.children[0];#}
+        {#    var newFlag = document.createElement("tr");#}
+        {#    seq++;#}
+        {#    flags.appendChild(newFlag);#}
+
+
+        function getTime() {
+            //1：获取时间
+            var date = new Date();
+            var d1 = date.getTime() - {{ log.create_time.timestamp }}* 1000;
+            //把时间通过通过innerHTML写到div中
+            var div1 = document.getElementById("times");
+            div1.innerHTML = MillisecondToDate(d1);
+            var d = document.getElementById("create_time");
+            d.innerHTML = date;
+        }
+
+        function hideA(obj) {
+            let btnModify = document.getElementById("modify" + obj);
+            let btnSave = document.getElementById("save" + obj);
+            let input = document.getElementById("input" + obj);
+            input.removeAttribute("disabled");
+            input.focus();
+            btnModify.hidden = "hidden";
+            btnSave.removeAttribute("hidden");
+        }
+
+        {#function hideB(obj) {#}
+        {#    let btnModify = document.getElementById("modify" + obj);#}
+        {#    let btnSave = document.getElementById("save" + obj);#}
+        {#    let input = document.getElementById("input" + obj);#}
+        {#    btnModify.removeAttribute("hidden");#}
+        {#    input.disabled = "disabled";#}
+        {#    btnSave.hidden = "hidden";#}
+
+        //让页面每一秒执行一次 定时器(setInterval)
+        if ("{{ log.status }}" === "True") {
+            setInterval("getTime();", 1000);//两个参数（函数名，时间间隔(毫秒)
+        }
+
+    </script>
+</head>
+<body>
+<h1>{{ log.name }}</h1>
+<h2>任务目标：{{ log.target }}</h2>
+<p>创建时间：{{ log.create_time }}</p>
+{% if log.status %}
+<h2>用时：</h2>
+    <div id="times"></div>
+    {% else %}
+    <h2>总用时：</h2>
+    {{ log.end_time }}
+{% endif %}
+{#<input type="button" value="修改"/>#}
+{#<input type="button" value="保存"/>#}
+{% if log.status %}
+<form action="{% url 'djtest:log_end' %}" method="post">
+    <input type="hidden" name="log_id" value="{{ log.id }}">
+    <input type="submit" value="结束计时" style="font-size:16px;">
+</form>
+{% endif %}
+<div id="flag_div">
+    <table>
+        {% for flag in flags %}
+            <tr id="{{ flag.flag.seq }}">
+                <td id="log_name">{{ log.name }}</td>
+                <td id="flag_seq">{{ flag.flag.seq }}：</td>
+                <td>
+                    <form action="{% url 'djtest:flag_item' %}" method="post">
+                        <input id="flag{{ flag.flag.seq }}" name="log_id" type="hidden" value="{{ log.id }}">
+                        <input id="flag{{ flag.flag.seq }}" name="flag_id" type="hidden" value="{{ flag.flag.id }}">
+                        <input type="text" id="input{{ flag.flag.seq }}" name="flag_name" value="{{ flag.flag.name }}" disabled="disabled" >
+                        <input id="modify{{ flag.flag.seq }}" type="button" onclick="hideA({{ flag.flag.seq }})"
+                               value="修改"/>
+                        <input id="save{{ flag.flag.seq }}" hidden="hidden" type="submit" value="保存"/>
+                    </form>
+                </td>
+                <td id="flag_time"> {{ flag.flag_time }} </td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+{% if log.status %}
+<form action="{% url 'djtest:flag_add' %}" method="post">
+    <input type="hidden" name="seq" value="{{ flags_num }}">
+    <input type="hidden" name="log_id" value="{{ log.id }}">
+    <input type="submit" value="+" style="font-size:16px;">
+</form>
+{% endif %}
+</body>
+</html>
